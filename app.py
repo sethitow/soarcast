@@ -18,9 +18,6 @@ def hello():
 def get_forecast(site):
     data = requests.get(
         f"https://api.weather.gov/points/{site['lat']},{site['lng']}/forecast/hourly").json()
-    sun_data = requests.get(f"https://api.sunrise-sunset.org/json?lat={site['lat']}&lng={site['lng']}&formatted=0").json()
-    sunrise = date_parse(sun_data['results']['sunrise'])
-    sunset = date_parse(sun_data['results']['sunset'])
 
     grouped = itertools.groupby(data['properties']['periods'], lambda x: date_parse(x['startTime']).weekday())
 
@@ -28,13 +25,8 @@ def get_forecast(site):
     for day, hours in grouped:
         wind = []
         for hour in hours:
-            start = date_parse(hour['startTime'])
-            if sunrise < start < sunset:
-                wind_speed = float(hour['windSpeed'][:-4])
-                wind.append(wind_speed)
-
-        sunrise = sunrise + datetime.timedelta(days=1)
-        sunset = sunset + datetime.timedelta(days=1)
+            wind_speed = float(hour['windSpeed'][:-4])
+            wind.append(wind_speed)
         try:
             result.append({calendar.day_name[day]: statistics.mean(wind)})
         except statistics.StatisticsError as _:
