@@ -25,8 +25,10 @@ def get_forecast(site):
     for day, hours in grouped:
         wind = []
         for hour in hours:
-            wind_speed = float(hour['windSpeed'][:-4])
-            wind.append(wind_speed)
+            start = date_parse(hour['startTime'])
+            if 6 < start.hour < 16:
+                wind_speed = float(hour['windSpeed'][:-4])
+                wind.append(wind_speed)
         try:
             result.append({calendar.day_name[day]: statistics.mean(wind)})
         except statistics.StatisticsError as _:
