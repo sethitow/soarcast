@@ -1,7 +1,7 @@
 FROM python:3.6-alpine
 
 LABEL Name=soarcast Version=0.0.1
-EXPOSE 8080
+EXPOSE 5000
 
 WORKDIR /app
 ADD . /app
