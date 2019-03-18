@@ -52,7 +52,7 @@ deploy-master:
     - echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
     - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json  || die "unable to authenticate service account for gcloud"
     - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone $GKE_CLUSTER_ZONE --project $GCP_PROJECT_ID
-    - kubectl --version
+    - kubectl version
   script:
     # - kubectl --namespace=soarcast delete deployment soarcast-backend
     - kubectl apply -f k8s/app.yml
