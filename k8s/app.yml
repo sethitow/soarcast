@@ -40,10 +40,10 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: weather-particle-ingress
-  namespace: weather
+  name: soarcast-backend
+  namespace: soarcast
   labels:
-    app: weather-particle-ingress
+    app: soarcast-backend
   annotations:
       kubernetes.io/ingress.class: nginx
       certmanager.k8s.io/cluster-issuer: letsencrypt-prod
@@ -60,3 +60,11 @@ spec:
             backend:
               serviceName: soarcast-backend
               servicePort: http
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: soarcast
+  labels:
+    name: soarcast
+
