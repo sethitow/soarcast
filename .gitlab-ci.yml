@@ -1,45 +1,45 @@
-# stages:
-#   - test
-#   - build
-#   - deploy
+stages:
+  - test
+  - build
+  - deploy
 
-# unit-test:
-#   stage: test
-#   image: python:3.7-stretch
-#   before_script:
-#     - python3 -m pip install --no-cache-dir pipenv
-#     - pipenv install --system --dev
-#   script:
-#     - nosetests
-#     - pylint --exit-zero **/*.py
+unit-test:
+  stage: test
+  image: python:3.7-stretch
+  before_script:
+    - python3 -m pip install --no-cache-dir pipenv
+    - pipenv install --system --dev
+  script:
+    - nosetests
+    - pylint --exit-zero **/*.py
 
-# build-master:
-#   stage: build
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   before_script:
-#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-#   script:
-#     - docker build --pull -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" .
-#     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
-#     - docker tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" "$CI_REGISTRY_IMAGE/backend:latest"
-#     - docker push "$CI_REGISTRY_IMAGE/backend:latest"
-#   only:
-#     - master
+build-master:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
+    - docker tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" "$CI_REGISTRY_IMAGE/backend:latest"
+    - docker push "$CI_REGISTRY_IMAGE/backend:latest"
+  only:
+    - master
 
-# build:
-#   stage: build
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   before_script:
-#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-#   script:
-#     - docker build --pull -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" .
-#     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
-#   except:
-#     - master
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
+  except:
+    - master
 
 deploy-master:
   stage: deploy
@@ -54,7 +54,7 @@ deploy-master:
     - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone $GKE_CLUSTER_ZONE --project $GCP_PROJECT_ID
     - kubectl version
   script:
-    # - kubectl --namespace=soarcast delete deployment soarcast-backend
+    - kubectl --namespace=soarcast delete deployment soarcast-backend
     - kubectl apply -f k8s/app.yml
-  # only:
-  #   - master
+  only:
+    - master
