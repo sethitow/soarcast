@@ -43,7 +43,7 @@ build:
 
 deploy-master:
   stage: deploy
-  image: cloud-sdk:latest
+  image: google/cloud-sdk:latest
   variables:
     GCP_PROJECT_ID: avid-stone-229006
     GKE_CLUSTER_NAME: gitlab-cluster
