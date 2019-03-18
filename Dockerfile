@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.7-alpine
 
 LABEL Name=soarcast Version=0.0.1
 EXPOSE 5000
@@ -9,5 +9,5 @@ ADD . /app
 
 RUN python3 -m pip install --no-cache-dir pipenv && \
     pipenv install --system --deploy
-CMD ["python3", "serve.py"]
+CMD ["gunicorn"  , "-b", "0.0.0.0:5000", "app:app"]
 
