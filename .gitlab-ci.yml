@@ -13,6 +13,7 @@ build-master:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
+    - docker tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG" "$CI_REGISTRY_IMAGE/backend:latest"
     - docker push "$CI_REGISTRY_IMAGE/backend:latest"
   only:
     - master
