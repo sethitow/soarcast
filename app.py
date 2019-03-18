@@ -63,11 +63,17 @@ sites = {
         "name": "Ed Levin",
         "lat": 37.475,
         "lng": -121.861,
-        "ideal_min": 0,
-        "ideal_max": 8,
-        "dir_ideal": ["SSE", "S", "SSW", "SW", "WSW", "W"],
+        "speed_ideal_min": 0,
+        "speed_ideal_max": 8,
+        "speed_edge_min": 0,
+        "speed_edge_max": 13,
+        "dir_ideal_min": 157.5,
+        "dir_ideal_max": 270.0,
+        "dir_edge_min": 135.0,
+        "dir_edge_max": 315.0,
     }
 }
+
 wind_dir_lookup = {
     "N": 0.0,
     "NNE": 22.5,
