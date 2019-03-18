@@ -1,0 +1,19 @@
+{
+    "ed_levin_1750": {
+        "name": "Ed Levin - 1750 ft",
+        "lat": 37.475,
+        "lng": -121.861,
+        "speed": {
+            "ideal_min": 0,
+            "ideal_max": 8,
+            "edge_min": 0,
+            "edge_max": 13
+        },
+        "direction": {
+            "ideal_max": 270.0,
+            "ideal_min": 157.5,
+            "edge_min": 135.0,
+            "edge_max": 315.0
+        }
+    }
+}

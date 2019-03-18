@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import itertools
+import json
 import logging
 import pytz
 import statistics
@@ -11,6 +12,9 @@ import requests
 
 
 app = Flask(__name__)
+
+with open("launches.json") as f:
+    launches = json.load(f)
 
 
 @app.route("/api/launches")
@@ -57,22 +61,6 @@ def get_forecast(launch):
 
     return result
 
-
-launches = {
-    "ed_levin_1750": {
-        "name": "Ed Levin - 1750 ft",
-        "lat": 37.475,
-        "lng": -121.861,
-        "speed_ideal_min": 0,
-        "speed_ideal_max": 8,
-        "speed_edge_min": 0,
-        "speed_edge_max": 13,
-        "dir_ideal_min": 157.5,
-        "dir_ideal_max": 270.0,
-        "dir_edge_min": 135.0,
-        "dir_edge_max": 315.0,
-    }
-}
 
 wind_dir_lookup = {
     "N": 0.0,
