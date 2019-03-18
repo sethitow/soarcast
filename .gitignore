@@ -1,6 +1,9 @@
 # IDE
 .vscode
 
+# Black
+.*.py.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -116,3 +119,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+app.py
