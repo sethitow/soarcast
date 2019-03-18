@@ -51,8 +51,9 @@ deploy-master:
     - gcloud --quiet components update
     - gcloud --quiet components install kubectl
     - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json  || die "unable to authenticate service account for gcloud"
+    - kubectl --version
   script:
-    - kubectl --namespace=soarcast delete deployment soarcast-backend
+    # - kubectl --namespace=soarcast delete deployment soarcast-backend
     - kubectl apply -f k8s/app.yml
   # only:
   #   - master
