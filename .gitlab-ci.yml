@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - deploy
 
 unit-test:
   stage: test
@@ -39,3 +40,19 @@ build:
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_SLUG"
   except:
     - master
+
+deploy-master:
+  stage: deploy
+  image: cloud-sdk:latest
+  variables:
+    GCP_PROJECT_ID: avid-stone-229006
+  before_script:
+    - echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
+    - gcloud --quiet components update
+    - gcloud --quiet components install kubectl
+    - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json  || die "unable to authenticate service account for gcloud"
+  script:
+    - kubectl --namespace=soarcast delete deployment soarcast-backend
+    - kubectl apply -f k8s/app.yml
+  # only:
+  #   - master
