@@ -45,12 +45,15 @@ deploy-master:
   stage: deploy
   image: cloud-sdk:latest
   variables:
-    GCP_PROJECT_ID: avid-stone-229006
+    - GCP_PROJECT_ID: avid-stone-229006
+    - GKE_CLUSTER_NAME: gitlab-cluster
+    - GKE_CLUSTER_ZONE: us-central1-a
   before_script:
     - echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
     - gcloud --quiet components update
     - gcloud --quiet components install kubectl
     - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json  || die "unable to authenticate service account for gcloud"
+    - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone $GKE_CLUSTER_ZONE
     - kubectl --version
   script:
     # - kubectl --namespace=soarcast delete deployment soarcast-backend
