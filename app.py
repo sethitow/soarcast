@@ -1,9 +1,7 @@
 import calendar
-import datetime
 import itertools
 import json
 import logging
-import pytz
 import statistics
 
 from dateutil.parser import parse as date_parse
@@ -46,7 +44,7 @@ def get_forecast(launch):
                 wind_speed = float(hour["windSpeed"][:-4])
 
                 wind.append(wind_speed)
-                wind_dir.append(wind_dir_lookup[hour["windDirection"]])
+                wind_dir.append(WIND_DIR_LOOKUP[hour["windDirection"]])
         try:
             avg_speed = statistics.mean(wind)
             avg_dir = statistics.mean(wind_dir)
@@ -69,19 +67,19 @@ def score(value, limits):
     if limits["ideal_min"] <= value <= limits["ideal_max"]:
         # Within ideal limits, so we're good.
         return 1
-    elif not (limits["edge_min"] < value < limits["edge_max"]):
+    if not limits["edge_min"] < value < limits["edge_max"]:
         # Outside edge limits, so no go.
         return 0
-    elif value > limits["ideal_max"]:
+    if value > limits["ideal_max"]:
         # Between Ideal and Edge on upper side, interpolate.
         slope = -1 / (limits["edge_max"] - limits["ideal_max"])
         return value * slope - limits["edge_max"] * slope
-    elif value < limits["ideal_min"]:
+    if value < limits["ideal_min"]:
         # Between Ideal and Edge on lower side, interpolate.
         raise NotImplementedError
 
 
-wind_dir_lookup = {
+WIND_DIR_LOOKUP = {
     "N": 0.0,
     "NNE": 22.5,
     "NE": 45.0,
