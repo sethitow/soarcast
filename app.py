@@ -13,19 +13,19 @@ import requests
 app = Flask(__name__)
 
 
-@app.route("/api/sites")
-def get_sites():
-    return jsonify(sites)
+@app.route("/api/launches")
+def get_launches():
+    return jsonify(launches)
 
 
-@app.route("/api/site/<site_slug>")
-def get_site_by_slug(site_slug):
-    return jsonify(get_forecast(sites[site_slug]))
+@app.route("/api/launch/<launch_slug>")
+def get_launch_by_slug(launch_slug):
+    return jsonify(get_forecast(launches[launch_slug]))
 
 
-def get_forecast(site):
+def get_forecast(launch):
     data = requests.get(
-        f"https://api.weather.gov/points/{site['lat']},{site['lng']}/forecast/hourly"
+        f"https://api.weather.gov/points/{launch['lat']},{launch['lng']}/forecast/hourly"
     ).json()
     app.logger.debug(data)
     grouped = itertools.groupby(
@@ -58,9 +58,9 @@ def get_forecast(site):
     return result
 
 
-sites = {
-    "ed_levin": {
-        "name": "Ed Levin",
+launches = {
+    "ed_levin_1750": {
+        "name": "Ed Levin - 1750 ft",
         "lat": 37.475,
         "lng": -121.861,
         "speed_ideal_min": 0,
