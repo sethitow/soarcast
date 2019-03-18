@@ -10,7 +10,7 @@ unit-test:
     - pipenv install --system --dev
   script:
     - nosetests
-    - pylint **/*.py
+    - pylint --exit-zero **/*.py
 
 build-master:
   stage: build
