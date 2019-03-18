@@ -1,3 +1,10 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: soarcast
+  labels:
+    name: soarcast
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -60,11 +67,4 @@ spec:
             backend:
               serviceName: soarcast-backend
               servicePort: http
----
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: soarcast
-  labels:
-    name: soarcast
 
