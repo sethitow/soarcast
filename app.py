@@ -48,11 +48,14 @@ def get_forecast(launch):
                 wind.append(wind_speed)
                 wind_dir.append(wind_dir_lookup[hour["windDirection"]])
         try:
+            avg_speed = statistics.mean(wind)
+            avg_dir = statistics.mean(wind_dir)
             result.append(
                 {
                     calendar.day_name[day]: {
-                        "wind_speed": statistics.mean(wind),
-                        "wind_dir": statistics.mean(wind_dir),
+                        "wind_speed": avg_speed,
+                        "wind_dir": avg_dir,
+                        "wind_speed_score": score(avg_speed, launch["speed"]),
                     }
                 }
             )
@@ -60,6 +63,22 @@ def get_forecast(launch):
             pass
 
     return result
+
+
+def score(value, limits):
+    if limits["ideal_min"] <= value <= limits["ideal_max"]:
+        # Within ideal limits, so we're good.
+        return 1
+    elif not (limits["edge_min"] < value < limits["edge_max"]):
+        # Outside edge limits, so no go.
+        return 0
+    elif value > limits["ideal_max"]:
+        # Between Ideal and Edge on upper side, interpolate.
+        slope = -1 / (limits["edge_max"] - limits["ideal_max"])
+        return value * slope - limits["edge_max"] * slope
+    elif value < limits["ideal_min"]:
+        # Between Ideal and Edge on lower side, interpolate.
+        raise NotImplementedError
 
 
 wind_dir_lookup = {
