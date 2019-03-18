@@ -45,9 +45,9 @@ deploy-master:
   stage: deploy
   image: cloud-sdk:latest
   variables:
-    - GCP_PROJECT_ID: avid-stone-229006
-    - GKE_CLUSTER_NAME: gitlab-cluster
-    - GKE_CLUSTER_ZONE: us-central1-a
+    GCP_PROJECT_ID: avid-stone-229006
+    GKE_CLUSTER_NAME: gitlab-cluster
+    GKE_CLUSTER_ZONE: us-central1-a
   before_script:
     - echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
     - gcloud --quiet components update
