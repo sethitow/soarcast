@@ -6,10 +6,12 @@ import statistics
 
 from dateutil.parser import parse as date_parse
 from flask import Flask, jsonify
+import flask.logging
 import requests
 
 
 app = Flask(__name__)
+log = flask.logging.create_logger(app)
 
 with open("launches.json") as f:
     launches = json.load(f)
@@ -29,7 +31,7 @@ def get_forecast(launch):
     data = requests.get(
         f"https://api.weather.gov/points/{launch['lat']},{launch['lng']}/forecast/hourly"
     ).json()
-    app.logger.debug(data)
+    log.debug(data)
     grouped = itertools.groupby(
         data["properties"]["periods"], lambda x: date_parse(x["startTime"]).weekday()
     )
@@ -37,23 +39,28 @@ def get_forecast(launch):
     result = []
     for day, hours in grouped:
         wind = []
-        wind_dir = []
+        wind_direction = []
         for hour in hours:
             start = date_parse(hour["startTime"])
             if 6 < start.hour < 16:
                 wind_speed = float(hour["windSpeed"][:-4])
 
                 wind.append(wind_speed)
-                wind_dir.append(WIND_DIR_LOOKUP[hour["windDirection"]])
+                wind_direction.append(DIRECTION_DEGREES_LOOKUP[hour["windDirection"]])
         try:
             avg_speed = statistics.mean(wind)
-            avg_dir = statistics.mean(wind_dir)
+            avg_direction = statistics.mean(wind_direction)
+            wind_speed_score = score(avg_speed, launch["speed"])
+            wind_direction_score = score(avg_direction, launch["direction"])
+
             result.append(
                 {
                     calendar.day_name[day]: {
                         "wind_speed": avg_speed,
-                        "wind_dir": avg_dir,
-                        "wind_speed_score": score(avg_speed, launch["speed"]),
+                        "wind_direction": avg_direction,
+                        "wind_speed_score": wind_speed_score,
+                        "wind_direction_score": wind_direction_score,
+                        "total_score": wind_direction_score * wind_speed_score,
                     }
                 }
             )
@@ -72,14 +79,15 @@ def score(value, limits):
         return 0
     if value > limits["ideal_max"]:
         # Between Ideal and Edge on upper side, interpolate.
-        slope = -1 / (limits["edge_max"] - limits["ideal_max"])
+        slope = 1 / (limits["ideal_max"] - limits["edge_max"])
         return value * slope - limits["edge_max"] * slope
     if value < limits["ideal_min"]:
         # Between Ideal and Edge on lower side, interpolate.
-        raise NotImplementedError
+        slope = 1 / (limits["ideal_min"] - limits["edge_min"])
+        return (value - limits["edge_min"]) * slope
 
 
-WIND_DIR_LOOKUP = {
+DIRECTION_DEGREES_LOOKUP = {
     "N": 0.0,
     "NNE": 22.5,
     "NE": 45.0,
