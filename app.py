@@ -44,10 +44,9 @@ def get_launch_by_slug(launch_slug):
             for hour in hours:
                 start = date_parse(hour["startTime"])
                 if 6 < start.hour < 16:
-                    wind_speed.append(float(hour["windSpeed"][:-4]))
-                    wind_direction.append(
-                        DIRECTION_DEGREES_LOOKUP[hour["windDirection"]]
-                    )
+                    wind = make_wind_dict(hour)
+                    wind_speed.append(wind["speed"])
+                    wind_direction.append(wind["direction"])
             try:
                 speed_average = statistics.mean(wind_speed)
                 direction_average = statistics.mean(wind_direction)
@@ -62,18 +61,24 @@ def get_launch_by_slug(launch_slug):
     elif interval == "hourly":
         result = []
         for hour in data["properties"]["periods"]:
-            speed = float(hour["windSpeed"][:-4])
-            direction = DIRECTION_DEGREES_LOOKUP[hour["windDirection"]]
+            wind = make_wind_dict(hour)
             result.append(
                 {
                     date_parse(hour["startTime"]).isoformat(): make_time_unit_dict(
-                        speed, direction, launch
+                        wind["speed"], wind["direction"], launch
                     )
                 }
             )
         return jsonify(result)
     else:
         return "Invalid interval", 400
+
+
+def make_wind_dict(period):
+    return {
+        "speed": float(period["windSpeed"][:-4]),
+        "direction": DIRECTION_DEGREES_LOOKUP[period["windDirection"]],
+    }
 
 
 def make_time_unit_dict(speed, direction, launch):
