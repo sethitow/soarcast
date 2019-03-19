@@ -60,7 +60,18 @@ def get_launch_by_slug(launch_slug):
 
         return jsonify(result)
     elif interval == "hourly":
-        return "Not Implemented", 501
+        result = []
+        for hour in data["properties"]["periods"]:
+            speed = float(hour["windSpeed"][:-4])
+            direction = DIRECTION_DEGREES_LOOKUP[hour["windDirection"]]
+            result.append(
+                {
+                    date_parse(hour["startTime"]).isoformat(): make_time_unit_dict(
+                        speed, direction, launch
+                    )
+                }
+            )
+        return jsonify(result)
     else:
         return "Invalid interval", 400
 
