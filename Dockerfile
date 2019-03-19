@@ -1,7 +1,6 @@
 FROM python:3.7-alpine
 
-LABEL Name=soarcast Version=0.0.1
-LABEL maintainer=thedingwing@gmail.com
+LABEL Name=soarcast maintainer=thedingwing@gmail.com
 
 ADD . /app
 WORKDIR /app
