@@ -15,12 +15,12 @@ with open("launches.json") as f:
     launches = json.load(f)
 
 
-@app.route("/api/launches")
+@app.route("/api/v1/launches")
 def get_launches():
     return jsonify(launches)
 
 
-@app.route("/api/launch/<launch_slug>")
+@app.route("/api/v1/launches/<launch_slug>")
 def get_launch_by_slug(launch_slug):
     return jsonify(get_forecast(launches[launch_slug]))
 
