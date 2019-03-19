@@ -5,7 +5,8 @@ import logging
 import statistics
 
 from dateutil.parser import parse as date_parse
-from flask import Flask, jsonify
+import flask
+from flask import Flask, jsonify, request
 import flask.logging
 import requests
 
@@ -17,57 +18,63 @@ with open("launches.json") as f:
     launches = json.load(f)
 
 
-@app.route("/api/v1/launches")
+@app.route("/api/v1/launches", methods=["GET"])
 def get_launches():
     return jsonify(launches)
 
 
-@app.route("/api/v1/launches/<launch_slug>")
+@app.route("/api/v1/launches/<launch_slug>", methods=["GET"])
 def get_launch_by_slug(launch_slug):
-    return jsonify(get_forecast(launches[launch_slug]))
-
-
-def get_forecast(launch):
+    launch = launches[launch_slug]
     data = requests.get(
         f"https://api.weather.gov/points/{launch['lat']},{launch['lng']}/forecast/hourly"
     ).json()
     log.debug(data)
-    grouped = itertools.groupby(
-        data["properties"]["periods"], lambda x: date_parse(x["startTime"]).weekday()
-    )
+    interval = request.args.get("interval")
 
-    result = []
-    for day, hours in grouped:
-        wind = []
-        wind_direction = []
-        for hour in hours:
-            start = date_parse(hour["startTime"])
-            if 6 < start.hour < 16:
-                wind_speed = float(hour["windSpeed"][:-4])
+    if interval == None or interval == "daily":
+        result = []
+        grouped = itertools.groupby(
+            data["properties"]["periods"],
+            lambda x: date_parse(x["startTime"]).date().isoformat(),
+        )
+        for day, hours in grouped:
+            wind_speed = []
+            wind_direction = []
+            for hour in hours:
+                start = date_parse(hour["startTime"])
+                if 6 < start.hour < 16:
+                    wind_speed.append(float(hour["windSpeed"][:-4]))
+                    wind_direction.append(
+                        DIRECTION_DEGREES_LOOKUP[hour["windDirection"]]
+                    )
+            try:
+                speed_average = statistics.mean(wind_speed)
+                direction_average = statistics.mean(wind_direction)
+            except statistics.StatisticsError as _:
+                pass
+            finally:
+                result.append(
+                    {day: make_time_unit_dict(speed_average, direction_average, launch)}
+                )
 
-                wind.append(wind_speed)
-                wind_direction.append(DIRECTION_DEGREES_LOOKUP[hour["windDirection"]])
-        try:
-            avg_speed = statistics.mean(wind)
-            avg_direction = statistics.mean(wind_direction)
-            wind_speed_score = score(avg_speed, launch["speed"])
-            wind_direction_score = score(avg_direction, launch["direction"])
+        return jsonify(result)
+    elif interval == "hourly":
+        return "Not Implemented", 501
+    else:
+        return "Invalid interval", 400
 
-            result.append(
-                {
-                    calendar.day_name[day]: {
-                        "wind_speed": avg_speed,
-                        "wind_direction": avg_direction,
-                        "wind_speed_score": wind_speed_score,
-                        "wind_direction_score": wind_direction_score,
-                        "total_score": wind_direction_score * wind_speed_score,
-                    }
-                }
-            )
-        except statistics.StatisticsError as _:
-            pass
 
-    return result
+def make_time_unit_dict(speed, direction, launch):
+    speed_score = score(speed, launch["speed"])
+    direction_score = score(direction, launch["direction"])
+    return {
+        "wind_speed": speed,
+        "wind_direction": direction,
+        "wind_speed_score": speed_score,
+        "wind_direction_score": direction_score,
+        "total_score": speed_score * direction_score,
+    }
 
 
 def score(value, limits):
