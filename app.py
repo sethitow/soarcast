@@ -8,11 +8,13 @@ from dateutil.parser import parse as date_parse
 import flask
 from flask import Flask, jsonify, request
 import flask.logging
+from flask_caching import Cache
 import requests
 
 
 app = Flask(__name__)
 log = flask.logging.create_logger(app)
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 with open("launches.json") as f:
     launches = json.load(f)
@@ -26,9 +28,7 @@ def get_launches():
 @app.route("/api/v1/launches/<launch_slug>", methods=["GET"])
 def get_launch_by_slug(launch_slug):
     launch = launches[launch_slug]
-    data = requests.get(
-        f"https://api.weather.gov/points/{launch['lat']},{launch['lng']}/forecast/hourly"
-    ).json()
+    data = get_weather(launch['lat'], launch['lng'])
     log.debug(data)
     interval = request.args.get("interval")
 
@@ -73,6 +73,11 @@ def get_launch_by_slug(launch_slug):
     else:
         return "Invalid interval", 400
 
+@cache.memoize(timeout=3600)
+def get_weather(lat, lng):
+    return requests.get(
+            f"https://api.weather.gov/points/{lat},{lng}/forecast/hourly"
+        ).json()
 
 def make_wind_dict(period):
     return {
