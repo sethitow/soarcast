@@ -57,13 +57,13 @@ metadata:
 spec:
   tls:
     - hosts:
-      - soarcast.sethitow.com
+      - api.soarcast.sethitow.com
       secretName: letsencrypt-prod
   rules:
-    - host: soarcast.sethitow.com
+    - host: api.soarcast.sethitow.com
       http:
         paths:
-          - path: /api
+          - path: /
             backend:
               serviceName: soarcast-backend
               servicePort: http
